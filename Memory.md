@@ -268,7 +268,7 @@ Reference vibe: **Grafana-style ops dashboard + enterprise HSE tool** (data-dens
   - Repo structure defined.  
   - This memory document created.  
   - No substantial code yet (starting from next session).
-  - **M4 / llm_service:** Steps 1–3 complete – `llm_service/main.py` with FastAPI app and `GET /ping` (port 8001); `llm_service/client.py` with `chat_with_ollama`, custom `OllamaError`, requests-based HTTP client to `http://localhost:11434/api/chat` with `llama3.2`; `llm_service/analytics.py` with `compute_kpis` and `extract_violations` (resilient parsing, tie-breaking, repeat violators, 24h distribution). See `llm_service/README.md` for full details.
+  - **M4 / llm_service:** Steps 1–4 complete – `llm_service/main.py` with FastAPI app and `GET /ping` (port 8001); `llm_service/client.py` with `chat_with_ollama`, `OllamaError`, requests-based client for `llama3.2`; `llm_service/analytics.py` with `compute_kpis` and `extract_violations`; comprehensive unit test suite in `tests/test_analytics.py` (9 tests passing). See `llm_service/README.md` for full details.
 
 - **Open questions / risks:**
   - Whether to implement live video in Streamlit or keep OpenCV windows separate.  
@@ -310,6 +310,10 @@ Reference vibe: **Grafana-style ops dashboard + enterprise HSE tool** (data-dens
 - Implemented `llm_service/analytics.py` with `compute_kpis(violations)` and `extract_violations(data)`.
 - Handles full 24-hour distribution ("00"-"23"), repeat violators (track_id count > 1), missing fields ("UNKNOWN"), ISO and trailing "Z" timestamps, and stable tie-breaking.
 - Updated `llm_service/README.md` KPI table and `Memory.md`. Open questions: none.
+
+**2026-10-01 – M4: LLM Service Step 4 (analytics unit tests)**
+- Added `tests/test_analytics.py` with 9 pytest unit tests using Arrange-Act-Assert covering standard inputs, empty lists, repeat offenders, missing/malformed fields, trailing "Z" and ISO timestamps, alphabetical tie-breaking, and malformed wrapper payloads. All 9 tests passing.
+- Updated `llm_service/README.md` and `Memory.md`. Open questions: none.
 
 ***
 

@@ -110,3 +110,4 @@ The service talks to Ollama over HTTP via `chat_with_ollama(messages: list[dict]
 | 2026-10-01 | Step 1: Initial skeleton with `GET /ping` endpoint | No |
 | 2026-10-01 | Step 2: Implemented `client.py` (`chat_with_ollama`, `OllamaError`, timeouts, low temperature) | No |
 | 2026-10-01 | Step 3: Implemented `analytics.py` (`compute_kpis`, `extract_violations`, 24h distribution, repeat violators, resilient parsing) | No |
+| 2026-10-01 | Step 4: Implemented `tests/test_analytics.py` (9 unit tests for normal data, empty list, repeat violators, missing fields, timestamp formats, ties, and bad inputs) | No |
