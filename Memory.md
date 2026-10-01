@@ -268,7 +268,7 @@ Reference vibe: **Grafana-style ops dashboard + enterprise HSE tool** (data-dens
   - Repo structure defined.  
   - This memory document created.  
   - No substantial code yet (starting from next session).
-  - **M4 / llm_service:** Steps 1 & 2 complete – `llm_service/main.py` with FastAPI app and `GET /ping` endpoint (port 8001); `llm_service/client.py` with `chat_with_ollama`, custom `OllamaError`, requests-based HTTP client to `http://localhost:11434/api/chat` with model `llama3.2`. See `llm_service/README.md` for full details.
+  - **M4 / llm_service:** Steps 1–3 complete – `llm_service/main.py` with FastAPI app and `GET /ping` (port 8001); `llm_service/client.py` with `chat_with_ollama`, custom `OllamaError`, requests-based HTTP client to `http://localhost:11434/api/chat` with `llama3.2`; `llm_service/analytics.py` with `compute_kpis` and `extract_violations` (resilient parsing, tie-breaking, repeat violators, 24h distribution). See `llm_service/README.md` for full details.
 
 - **Open questions / risks:**
   - Whether to implement live video in Streamlit or keep OpenCV windows separate.  
@@ -305,6 +305,11 @@ Reference vibe: **Grafana-style ops dashboard + enterprise HSE tool** (data-dens
 - Implemented `llm_service/client.py` with `chat_with_ollama(messages)` connecting to local Ollama on port 11434 with model `llama3.2` and low temperature (0.3).
 - Added custom `OllamaError` covering connection errors, timeouts, bad HTTP status, invalid JSON, and empty responses.
 - Updated `llm_service/README.md` and `Memory.md`. Open questions: none.
+
+**2026-10-01 – M4: LLM Service Step 3 (analytics & KPIs)**
+- Implemented `llm_service/analytics.py` with `compute_kpis(violations)` and `extract_violations(data)`.
+- Handles full 24-hour distribution ("00"-"23"), repeat violators (track_id count > 1), missing fields ("UNKNOWN"), ISO and trailing "Z" timestamps, and stable tie-breaking.
+- Updated `llm_service/README.md` KPI table and `Memory.md`. Open questions: none.
 
 ***
 

@@ -57,9 +57,22 @@ shown as `"UNKNOWN"` in reports.
 | `timestamp`      | string | `"2026-10-01T11:42:10"`    | ISO 8601 datetime              |
 | `confidence`     | float  | `0.87`                     | Detection confidence 0–1       |
 
-## KPI Fields
+## KPI Fields (`compute_kpis`)
 
-*(Will be documented when `analytics.py` is implemented.)*
+The `compute_kpis(violations: list[dict]) -> dict` function aggregates violation records into structured metrics:
+
+| Field              | Type                      | Description                                                  | Example |
+|--------------------|---------------------------|--------------------------------------------------------------|---------|
+| `total`            | `int`                     | Total number of violations                                   | `12` |
+| `by_type`          | `dict[str, int]`          | Breakdown of counts by violation type                        | `{"NO_HELMET": 7, "NO_VEST": 5}` |
+| `by_zone`          | `dict[str, int]`          | Breakdown of counts by lab zone                              | `{"Workbench-1": 8, "Storage": 4}` |
+| `by_hour`          | `dict[str, int]`          | 24-hour distribution (keys `"00"` to `"23"`)                 | `{"00": 0, ..., "11": 8, ...}` |
+| `top_type`         | `str` or `null`           | Most common violation type (alphabetical tie-breaker)        | `"NO_HELMET"` |
+| `top_zone`         | `str` or `null`           | Most violated zone (alphabetical tie-breaker)                | `"Workbench-1"` |
+| `peak_hour`        | `str` or `null`           | Hour interval with most violations                           | `"11:00-12:00"` |
+| `repeat_violators` | `list[dict]`              | Track IDs with >1 violation: `[{"track_id": 7, "count": 3}]` | `[{"track_id": 7, "count": 3}]` |
+
+Missing fields in violation items are safely recorded under `"UNKNOWN"`. If `violations` is empty, `total` is `0`, `top_type`, `top_zone`, and `peak_hour` are `null`, and `repeat_violators` is `[]`.
 
 ## Configuration
 
@@ -96,3 +109,4 @@ The service talks to Ollama over HTTP via `chat_with_ollama(messages: list[dict]
 |------------|--------|-----------|
 | 2026-10-01 | Step 1: Initial skeleton with `GET /ping` endpoint | No |
 | 2026-10-01 | Step 2: Implemented `client.py` (`chat_with_ollama`, `OllamaError`, timeouts, low temperature) | No |
+| 2026-10-01 | Step 3: Implemented `analytics.py` (`compute_kpis`, `extract_violations`, 24h distribution, repeat violators, resilient parsing) | No |
