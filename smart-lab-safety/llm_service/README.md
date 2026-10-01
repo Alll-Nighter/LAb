@@ -63,10 +63,24 @@ shown as `"UNKNOWN"` in reports.
 
 ## Configuration
 
-| Variable       | Default                        | Description              |
-|---------------|-------------------------------|--------------------------|
-| `OLLAMA_URL`  | `http://localhost:11434`       | Ollama server base URL   |
-| `OLLAMA_MODEL`| `llama3.2`                     | Model name for inference |
+| Variable                 | Default                  | Description                               |
+|--------------------------|--------------------------|-------------------------------------------|
+| `OLLAMA_URL`             | `http://localhost:11434` | Ollama server base URL                    |
+| `OLLAMA_MODEL`           | `llama3.2`               | Model name for inference                  |
+| `OLLAMA_TIMEOUT_SECONDS` | `120`                    | HTTP request timeout in seconds           |
+| `OLLAMA_TEMPERATURE`     | `0.3`                    | Sampling temperature for deterministic output |
+
+## Client & Error Handling (`client.py`)
+
+The service talks to Ollama over HTTP via `chat_with_ollama(messages: list[dict]) -> str`:
+- **Endpoint:** `POST http://localhost:11434/api/chat`
+- **Payload:** `{"model": "llama3.2", "messages": [...], "stream": false, "options": {"temperature": 0.3}}`
+- **Error Handling:** Raises a custom `OllamaError` (subclass of `RuntimeError`) on:
+  - Connection failure (e.g. Ollama daemon not running)
+  - Request timeout
+  - Non-200 HTTP response
+  - Invalid / unparseable JSON
+  - Empty model response
 
 ## What Other Modules Need to Send / Expect
 
@@ -80,4 +94,5 @@ shown as `"UNKNOWN"` in reports.
 
 | Date       | Change | Breaking? |
 |------------|--------|-----------|
-| 2026-10-01 | Initial skeleton: `GET /ping` endpoint | No |
+| 2026-10-01 | Step 1: Initial skeleton with `GET /ping` endpoint | No |
+| 2026-10-01 | Step 2: Implemented `client.py` (`chat_with_ollama`, `OllamaError`, timeouts, low temperature) | No |
