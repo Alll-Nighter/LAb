@@ -268,6 +268,7 @@ Reference vibe: **Grafana-style ops dashboard + enterprise HSE tool** (data-dens
   - Repo structure defined.  
   - This memory document created.  
   - No substantial code yet (starting from next session).
+  - **M4 / llm_service:** Step 1 complete – `llm_service/main.py` with FastAPI app and `GET /ping` endpoint on port 8001. See `llm_service/README.md` for full details.
 
 - **Open questions / risks:**
   - Whether to implement live video in Streamlit or keep OpenCV windows separate.  
@@ -293,6 +294,12 @@ Reference vibe: **Grafana-style ops dashboard + enterprise HSE tool** (data-dens
 - What changed (e.g., “Switched tracker from ByteTrack to BoT-SORT due to X”).  
 - Why (e.g., “Better FPS on RTX 4050”, “Simpler integration”).  
 - New open questions or risks.
+
+**2026-10-01 – M4: LLM Service Step 1 (skeleton)**
+- Implemented `llm_service/main.py` with FastAPI app and `GET /ping` health-check endpoint (port 8001).
+- Created `llm_service/README.md` with endpoint docs, violation record format, and run instructions.
+- No interface changes; this is the initial skeleton.
+- See `llm_service/README.md` for full contract details.
 
 ***
 
