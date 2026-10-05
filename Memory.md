@@ -321,6 +321,11 @@ Reference vibe: **Grafana-style ops dashboard + enterprise HSE tool** (data-dens
 - Corrected the endpoint code to reject invalid request shapes and ensured prompts receive aggregate KPIs rather than raw violation records.
 - Verification: repository-wide Black check and Ruff pass; all 25 tests pass. HTTP checks covered ping, zero data, live local Ollama report/Q&A, blank-query HTTP 400, and fallback via a separate service process configured to a closed local Ollama port. No project requirements were changed. Open question: the shared API/UI integration contract should consume the documented endpoint formats.
 
+**2026-10-05 – M4: AI handoff documentation clarified**
+- Reorganized `smart-lab-safety/llm_service/README.md` as a standalone guide for future AI-assisted M4 work: it states the M4 ownership boundary, module responsibilities, exact request/response and KPI contracts, fallback behavior, environment settings, and local verification commands.
+- No service behavior or interface changes. Sorted the M4 test import block so the current Ruff check passes. Other modules are not assumed to exist or be implemented by M4.
+- Open question: none for the documented M4 interface. See `llm_service/README.md` for the contract.
+
 ***
 
 ## 12) How to Use This Document

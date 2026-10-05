@@ -7,6 +7,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 from fastapi import HTTPException
+
 from llm_service.client import OllamaError, chat_with_ollama
 from llm_service.main import QueryRequest, ReportRequest, answer_query, generate_report
 from llm_service.prompts import build_daily_report_prompt, build_query_prompt
