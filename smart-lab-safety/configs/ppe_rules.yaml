@@ -1,0 +1,11 @@
+class_mapping:
+  0: "PERSON"
+  1: "HELMET"
+  2: "VEST"
+zone_defaults:
+  required_ppe: ["HELMET", "VEST"]
+violation:
+  min_frames: 10
+thresholds:
+  conf: 0.25
+  iou: 0.45
