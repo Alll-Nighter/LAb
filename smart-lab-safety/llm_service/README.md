@@ -1,6 +1,6 @@
 # LLM Service (`llm_service/`)
 
-> **Last updated:** 2026-10-01
+> **Last updated:** 2026-10-05
 
 ## What It Does
 
@@ -41,7 +41,46 @@ Health check.
 {"status": "ok", "service": "llm_service"}
 ```
 
-*(More endpoints will be added in subsequent steps.)*
+### `POST /generate_report`
+
+Aggregates violation records and returns a daily summary. If there are no valid
+records, a fixed no-violations message is returned without calling Ollama.
+The message describes the supplied data and does not claim the lab is safe.
+
+**Request:**
+```json
+{"violations": [{"camera_id": 0, "zone": "Workbench-1", "track_id": 7, "violation_type": "NO_HELMET", "timestamp": "2026-10-01T11:42:10", "confidence": 0.87}]}
+```
+
+**Response (Ollama available):**
+```json
+{"status": "ok", "report": "The lab recorded 1 violation.", "kpis": {"total": 1, "by_type": {"NO_HELMET": 1}, "by_zone": {"Workbench-1": 1}, "by_hour": {"00": 0, "01": 0, "02": 0, "03": 0, "04": 0, "05": 0, "06": 0, "07": 0, "08": 0, "09": 0, "10": 0, "11": 1, "12": 0, "13": 0, "14": 0, "15": 0, "16": 0, "17": 0, "18": 0, "19": 0, "20": 0, "21": 0, "22": 0, "23": 0}, "top_type": "NO_HELMET", "top_zone": "Workbench-1", "peak_hour": "11:00-12:00", "repeat_violators": []}}
+```
+
+The `by_hour` object always includes all keys from `"00"` through `"23"`.
+When Ollama is unavailable, the response remains HTTP 200 with
+`{"status":"fallback","report":"Ollama is unavailable; make sure Ollama is running and llama3.2 is pulled.","kpis":{...}}`.
+Malformed request bodies receive FastAPI's HTTP 422 validation response.
+
+### `POST /answer_query`
+
+Answers a question using only computed KPIs. `data` may be a violation list or
+an object containing a `violations` list.
+
+**Request:**
+```json
+{"query": "Which zone had the most violations?", "data": {"violations": [{"zone": "Workbench-1", "violation_type": "NO_HELMET", "timestamp": "2026-10-01T11:42:10", "track_id": 7}]}}
+```
+
+**Response:**
+```json
+{"status": "ok", "answer": "Workbench-1 had the most violations, with 1.", "kpis": {"total": 1, "by_type": {"NO_HELMET": 1}, "by_zone": {"Workbench-1": 1}, "by_hour": {"00": 0, "01": 0, "02": 0, "03": 0, "04": 0, "05": 0, "06": 0, "07": 0, "08": 0, "09": 0, "10": 0, "11": 1, "12": 0, "13": 0, "14": 0, "15": 0, "16": 0, "17": 0, "18": 0, "19": 0, "20": 0, "21": 0, "22": 0, "23": 0}, "top_type": "NO_HELMET", "top_zone": "Workbench-1", "peak_hour": "11:00-12:00", "repeat_violators": []}}
+```
+
+The `by_hour` object always includes keys `"00"` through `"23"`. A blank
+query returns HTTP 400. Missing or wrongly typed required request fields return
+HTTP 422. If Ollama is unavailable, the endpoint returns HTTP 200 with
+`status: "fallback"` and an `answer` containing the unavailable message.
 
 ## Violation Record Format
 
@@ -78,6 +117,8 @@ Missing fields in violation items are safely recorded under `"UNKNOWN"`. If `vio
 
 | Variable                 | Default                  | Description                               |
 |--------------------------|--------------------------|-------------------------------------------|
+| Environment variable     | Default                  | Description                               |
+|--------------------------|--------------------------|-------------------------------------------|
 | `OLLAMA_URL`             | `http://localhost:11434` | Ollama server base URL                    |
 | `OLLAMA_MODEL`           | `llama3.2`               | Model name for inference                  |
 | `OLLAMA_TIMEOUT_SECONDS` | `120`                    | HTTP request timeout in seconds           |
@@ -95,11 +136,20 @@ The service talks to Ollama over HTTP via `chat_with_ollama(messages: list[dict]
   - Invalid / unparseable JSON
   - Empty model response
 
+## Prompt Builders (`prompts.py`)
+
+All prompt templates are strictly defined in `prompts.py` and return `list[dict]` message structures for chat completion:
+- `build_daily_report_prompt(kpis: dict) -> list[dict]`: System prompt instructs the model to act as a safety analyst and write a 5–7 line summary (total, top zone, top type, peak hour, repeat violators, 1 recommendation) using only provided KPIs.
+- `build_query_prompt(query: str, kpis: dict) -> list[dict]`: System prompt grounds answers on KPI metrics, explicitly directing the model to answer *"I don't have that information in the provided safety data."* when facts are missing.
+
 ## What Other Modules Need to Send / Expect
 
 - **To use the LLM Service**, send HTTP requests to `http://localhost:8001`.
 - `GET /ping` requires no body; returns `{"status": "ok", "service": "llm_service"}`.
-- Further endpoint contracts will be documented as they are built.
+- `POST /generate_report` takes `{"violations": [...]}` and returns `status`, `report`, and computed `kpis`.
+- `POST /answer_query` takes `{"query": "...", "data": {"violations": [...]}}`; `data` can also be a plain list. It returns `status`, `answer`, and computed `kpis`.
+- Send one JSON violation object per event using the record fields documented below. Extra fields are ignored. Missing `zone` and `violation_type` values are grouped under `UNKNOWN`; missing or invalid timestamps are excluded from the hourly counts; records without `track_id` are excluded from repeat-violator counts.
+- Both POST routes make a synchronous local Ollama request for non-empty data/questions. Their outage response uses `status: "fallback"`; empty reports skip Ollama. Blank questions return HTTP 400.
 
 ---
 
@@ -111,3 +161,5 @@ The service talks to Ollama over HTTP via `chat_with_ollama(messages: list[dict]
 | 2026-10-01 | Step 2: Implemented `client.py` (`chat_with_ollama`, `OllamaError`, timeouts, low temperature) | No |
 | 2026-10-01 | Step 3: Implemented `analytics.py` (`compute_kpis`, `extract_violations`, 24h distribution, repeat violators, resilient parsing) | No |
 | 2026-10-01 | Step 4: Implemented `tests/test_analytics.py` (9 unit tests for normal data, empty list, repeat violators, missing fields, timestamp formats, ties, and bad inputs) | No |
+| 2026-10-01 | Step 5: Implemented `prompts.py` (`build_daily_report_prompt`, `build_query_prompt` with strict hallucination guardrails) | No |
+| 2026-10-05 | Steps 6–8: Added validated report/query endpoints, endpoint and client tests, run scripts, and environment-based Ollama settings | No |

@@ -268,7 +268,7 @@ Reference vibe: **Grafana-style ops dashboard + enterprise HSE tool** (data-dens
   - Repo structure defined.  
   - This memory document created.  
   - No substantial code yet (starting from next session).
-  - **M4 / llm_service:** Steps 1–4 complete – `llm_service/main.py` with FastAPI app and `GET /ping` (port 8001); `llm_service/client.py` with `chat_with_ollama`, `OllamaError`, requests-based client for `llama3.2`; `llm_service/analytics.py` with `compute_kpis` and `extract_violations`; comprehensive unit test suite in `tests/test_analytics.py` (9 tests passing). See `llm_service/README.md` for full details.
+  - **M4 / llm_service:** Steps 1–8 implemented – FastAPI health, validated report/Q&A routes, Ollama HTTP client, KPI analytics and prompt builders; analytics and mocked-client/endpoint logic tests; Linux and Windows run scripts. See `llm_service/README.md` for full interface and operating details. Local HTTP/Ollama verification status is recorded in the latest change-log entry.
 
 - **Open questions / risks:**
   - Whether to implement live video in Streamlit or keep OpenCV windows separate.  
@@ -314,6 +314,12 @@ Reference vibe: **Grafana-style ops dashboard + enterprise HSE tool** (data-dens
 **2026-10-01 – M4: LLM Service Step 4 (analytics unit tests)**
 - Added `tests/test_analytics.py` with 9 pytest unit tests using Arrange-Act-Assert covering standard inputs, empty lists, repeat offenders, missing/malformed fields, trailing "Z" and ISO timestamps, alphabetical tie-breaking, and malformed wrapper payloads. All 9 tests passing.
 - Updated `llm_service/README.md` and `Memory.md`. Open questions: none.
+
+**2026-10-05 – M4: Complete LLM service implementation (Steps 5–8)**
+- Added structured report and Q&A prompts, Pydantic request models and both POST endpoints, including empty-report short-circuit, blank-query HTTP 400, and Ollama outage fallback.
+- Added mocked tests for prompt/client behavior and endpoint logic, Linux/Windows launch scripts, and environment-based Ollama URL/model/timeout/temperature settings. Updated `llm_service/README.md` with the service contract.
+- Corrected the endpoint code to reject invalid request shapes and ensured prompts receive aggregate KPIs rather than raw violation records.
+- Verification: repository-wide Black check and Ruff pass; all 25 tests pass. HTTP checks covered ping, zero data, live local Ollama report/Q&A, blank-query HTTP 400, and fallback via a separate service process configured to a closed local Ollama port. No project requirements were changed. Open question: the shared API/UI integration contract should consume the documented endpoint formats.
 
 ***
 

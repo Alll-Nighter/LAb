@@ -6,6 +6,7 @@ the transport layer is defined in exactly one place.
 """
 
 import logging
+import os
 
 import requests
 
@@ -13,16 +14,16 @@ import requests
 # Configuration constants (importable by other modules)
 # ---------------------------------------------------------------------------
 
-OLLAMA_URL: str = "http://localhost:11434"
+OLLAMA_URL: str = os.getenv("OLLAMA_URL", "http://localhost:11434").rstrip("/")
 """Base URL of the local Ollama server."""
 
-OLLAMA_MODEL: str = "llama3.2"
+OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "llama3.2")
 """Model name passed to Ollama for inference."""
 
-OLLAMA_TIMEOUT_SECONDS: int = 120
+OLLAMA_TIMEOUT_SECONDS: int = int(os.getenv("OLLAMA_TIMEOUT_SECONDS", "120"))
 """HTTP timeout for a single Ollama request (seconds)."""
 
-OLLAMA_TEMPERATURE: float = 0.3
+OLLAMA_TEMPERATURE: float = float(os.getenv("OLLAMA_TEMPERATURE", "0.3"))
 """Sampling temperature – low for deterministic, factual output."""
 
 _log = logging.getLogger(__name__)
