@@ -1,0 +1,1 @@
+{"violations": [{"camera_id": 0, "zone": "Workbench-1", "track_id": 7, "violation_type": "NO_HELMET", "timestamp": "2026-10-01T11:42:10Z", "confidence": 0.87}, {"camera_id": 1, "zone": "Workbench-2", "track_id": 8, "violation_type": "NO_VEST", "timestamp": "2026-10-01T11:55:00", "confidence": 0.92}]}

@@ -268,6 +268,7 @@ Reference vibe: **Grafana-style ops dashboard + enterprise HSE tool** (data-dens
   - Repo structure defined.  
   - This memory document created.  
   - No substantial code yet (starting from next session).
+  - **M4 / llm_service:** Steps 1–8 implemented – FastAPI health, validated report/Q&A routes, Ollama HTTP client, KPI analytics and prompt builders; analytics and mocked-client/endpoint logic tests; Linux and Windows run scripts. See `llm_service/README.md` for full interface and operating details. Local HTTP/Ollama verification status is recorded in the latest change-log entry.
 
 - **Open questions / risks:**
   - Whether to implement live video in Streamlit or keep OpenCV windows separate.  
@@ -293,6 +294,37 @@ Reference vibe: **Grafana-style ops dashboard + enterprise HSE tool** (data-dens
 - What changed (e.g., “Switched tracker from ByteTrack to BoT-SORT due to X”).  
 - Why (e.g., “Better FPS on RTX 4050”, “Simpler integration”).  
 - New open questions or risks.
+
+**2026-10-01 – M4: LLM Service Step 1 (skeleton)**
+- Implemented `llm_service/main.py` with FastAPI app and `GET /ping` health-check endpoint (port 8001).
+- Created `llm_service/README.md` with endpoint docs, violation record format, and run instructions.
+- No interface changes; this is the initial skeleton.
+- See `llm_service/README.md` for full contract details.
+
+**2026-10-01 – M4: LLM Service Step 2 (Ollama client)**
+- Implemented `llm_service/client.py` with `chat_with_ollama(messages)` connecting to local Ollama on port 11434 with model `llama3.2` and low temperature (0.3).
+- Added custom `OllamaError` covering connection errors, timeouts, bad HTTP status, invalid JSON, and empty responses.
+- Updated `llm_service/README.md` and `Memory.md`. Open questions: none.
+
+**2026-10-01 – M4: LLM Service Step 3 (analytics & KPIs)**
+- Implemented `llm_service/analytics.py` with `compute_kpis(violations)` and `extract_violations(data)`.
+- Handles full 24-hour distribution ("00"-"23"), repeat violators (track_id count > 1), missing fields ("UNKNOWN"), ISO and trailing "Z" timestamps, and stable tie-breaking.
+- Updated `llm_service/README.md` KPI table and `Memory.md`. Open questions: none.
+
+**2026-10-01 – M4: LLM Service Step 4 (analytics unit tests)**
+- Added `tests/test_analytics.py` with 9 pytest unit tests using Arrange-Act-Assert covering standard inputs, empty lists, repeat offenders, missing/malformed fields, trailing "Z" and ISO timestamps, alphabetical tie-breaking, and malformed wrapper payloads. All 9 tests passing.
+- Updated `llm_service/README.md` and `Memory.md`. Open questions: none.
+
+**2026-10-05 – M4: Complete LLM service implementation (Steps 5–8)**
+- Added structured report and Q&A prompts, Pydantic request models and both POST endpoints, including empty-report short-circuit, blank-query HTTP 400, and Ollama outage fallback.
+- Added mocked tests for prompt/client behavior and endpoint logic, Linux/Windows launch scripts, and environment-based Ollama URL/model/timeout/temperature settings. Updated `llm_service/README.md` with the service contract.
+- Corrected the endpoint code to reject invalid request shapes and ensured prompts receive aggregate KPIs rather than raw violation records.
+- Verification: repository-wide Black check and Ruff pass; all 25 tests pass. HTTP checks covered ping, zero data, live local Ollama report/Q&A, blank-query HTTP 400, and fallback via a separate service process configured to a closed local Ollama port. No project requirements were changed. Open question: the shared API/UI integration contract should consume the documented endpoint formats.
+
+**2026-10-05 – M4: AI handoff documentation clarified**
+- Reorganized `smart-lab-safety/llm_service/README.md` as a standalone guide for future AI-assisted M4 work: it states the M4 ownership boundary, module responsibilities, exact request/response and KPI contracts, fallback behavior, environment settings, and local verification commands.
+- No service behavior or interface changes. Sorted the M4 test import block so the current Ruff check passes. Other modules are not assumed to exist or be implemented by M4.
+- Open question: none for the documented M4 interface. See `llm_service/README.md` for the contract.
 
 ***
 
